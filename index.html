@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UDim2 Preview</title>
+    <title>UDim2 + Color3 Preview</title>
     <style>
         * {
             box-sizing: border-box;
@@ -45,6 +45,8 @@
             padding-bottom: 16px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             margin-bottom: 18px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .title {
@@ -65,7 +67,6 @@
             box-shadow: 0 0 10px #7aa2ff;
         }
 
-        /* ===== Info badges (pos + size) ===== */
         .info-badges {
             display: flex;
             gap: 6px;
@@ -120,23 +121,19 @@
 
         .target {
             position: absolute;
-            background: rgba(122, 162, 255, 0.25);
-            border: 1.5px solid #7aa2ff;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            border: 1.5px solid rgba(255, 255, 255, 0.6);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.7rem;
             font-weight: 600;
             color: #fff;
-            box-shadow: 0 0 20px rgba(122, 162, 255, 0.4),
-                        inset 0 0 12px rgba(122, 162, 255, 0.15);
             transition: left 0.06s linear, top 0.06s linear,
                         width 0.08s ease, height 0.08s ease,
-                        border-radius 0.15s ease;
+                        border-radius 0.15s ease,
+                        background 0.15s ease, box-shadow 0.15s ease;
             will-change: left, top, width, height;
-            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
             overflow: hidden;
         }
 
@@ -219,6 +216,57 @@
 
         .error:not(:empty) { min-height: 1em; }
 
+        /* ===== Color picker row ===== */
+        .color-input-wrapper {
+            position: relative;
+            width: 60px;
+            height: 38px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);
+        }
+
+        .color-input-wrapper:hover {
+            border-color: rgba(122, 162, 255, 0.6);
+            box-shadow: 0 0 12px rgba(122, 162, 255, 0.3), inset 0 0 0 1px rgba(0,0,0,0.3);
+        }
+
+        .color-input-wrapper input[type="color"] {
+            position: absolute;
+            inset: -4px;
+            width: calc(100% + 8px);
+            height: calc(100% + 8px);
+            border: none;
+            padding: 0;
+            background: transparent;
+            cursor: pointer;
+            opacity: 0;
+        }
+
+        .color-swatch {
+            width: 100%;
+            height: 100%;
+            background: #7aa2ff;
+            position: relative;
+            pointer-events: none;
+        }
+
+        .color-swatch::after {
+            content: '🎨';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            opacity: 0.85;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        }
+
         /* ===== Section label ===== */
         .section-label {
             font-size: 0.7rem;
@@ -243,6 +291,12 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 14px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
         }
 
         .slider-group { margin-bottom: 14px; }
@@ -300,6 +354,13 @@
             box-shadow: 0 0 10px rgba(122, 162, 255, 0.6);
             cursor: grab;
         }
+
+        .slider-r::-webkit-slider-thumb { background: #ff6b6b; box-shadow: 0 0 10px rgba(255,107,107,0.6); }
+        .slider-r::-moz-range-thumb { background: #ff6b6b; box-shadow: 0 0 10px rgba(255,107,107,0.6); }
+        .slider-g::-webkit-slider-thumb { background: #6bff9b; box-shadow: 0 0 10px rgba(107,255,155,0.6); }
+        .slider-g::-moz-range-thumb { background: #6bff9b; box-shadow: 0 0 10px rgba(107,255,155,0.6); }
+        .slider-b::-webkit-slider-thumb { background: #6bb5ff; box-shadow: 0 0 10px rgba(107,181,255,0.6); }
+        .slider-b::-moz-range-thumb { background: #6bb5ff; box-shadow: 0 0 10px rgba(107,181,255,0.6); }
 
         /* ===== Toggle ===== */
         .toggle-row {
@@ -546,18 +607,21 @@
             }
 
             .grid-2 { gap: 10px; }
+            .grid-3 { gap: 6px; }
 
             .badge { font-size: 0.68rem; padding: 3px 8px; }
+
+            .color-input-wrapper { width: 48px; }
         }
     </style>
 </head>
 <body>
     <div class="panel">
-        <!-- Header dengan badge pos + size -->
+        <!-- Header -->
         <div class="header">
             <div class="title">
                 <span class="dot"></span>
-                UDim2 Preview
+                UDim2 + Color3
             </div>
             <div class="info-badges">
                 <div class="badge">
@@ -567,6 +631,10 @@
                 <div class="badge">
                     <span class="badge-label">size</span>
                     <span id="sizeDisplay">56, 56</span>
+                </div>
+                <div class="badge">
+                    <span class="badge-label">rgb</span>
+                    <span id="rgbDisplay">122, 162, 255</span>
                 </div>
             </div>
         </div>
@@ -582,6 +650,7 @@
             <!-- ===== Kolom Kontrol ===== -->
             <div class="col-controls">
 
+                <!-- Input Posisi -->
                 <div class="input-section">
                     <div class="input-label">Input Posisi</div>
                     <div class="input-row">
@@ -591,6 +660,7 @@
                     <div class="error" id="posError"></div>
                 </div>
 
+                <!-- Input Ukuran -->
                 <div class="input-section">
                     <div class="input-label">Input Ukuran (px)</div>
                     <div class="input-row">
@@ -600,8 +670,23 @@
                     <div class="error" id="sizeError"></div>
                 </div>
 
+                <!-- Input Warna dengan Color Picker -->
+                <div class="input-section">
+                    <div class="input-label">Input Warna</div>
+                    <div class="input-row">
+                        <div class="color-input-wrapper" title="Klik untuk pilih warna">
+                            <div class="color-swatch" id="colorSwatch"></div>
+                            <input type="color" id="colorPicker" value="#7aa2ff">
+                        </div>
+                        <input type="text" id="colorInput" value="Color3.fromRGB(122, 162, 255)" spellcheck="false">
+                        <button id="applyColorBtn">Preview</button>
+                    </div>
+                    <div class="error" id="colorError"></div>
+                </div>
+
                 <div class="sep"></div>
 
+                <!-- Posisi -->
                 <div class="section-label">Posisi</div>
                 <div class="grid-2">
                     <div class="slider-group">
@@ -622,6 +707,7 @@
 
                 <div class="sep"></div>
 
+                <!-- Bentuk -->
                 <div class="section-label">Bentuk</div>
                 <div class="segmented" id="shapeControl">
                     <button class="active" data-shape="square">
@@ -634,6 +720,7 @@
 
                 <div class="sep"></div>
 
+                <!-- Ukuran -->
                 <div class="section-label">Ukuran</div>
                 <div class="grid-2">
                     <div class="slider-group" id="wGroup">
@@ -662,9 +749,38 @@
 
                 <div class="sep"></div>
 
+                <!-- Warna RGB -->
+                <div class="section-label">Warna (RGB)</div>
+                <div class="grid-3">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>R</span>
+                            <span id="rVal">122</span>
+                        </div>
+                        <input type="range" id="rSlider" class="slider-r" min="0" max="255" step="1" value="122">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>G</span>
+                            <span id="gVal">162</span>
+                        </div>
+                        <input type="range" id="gSlider" class="slider-g" min="0" max="255" step="1" value="162">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>B</span>
+                            <span id="bVal">255</span>
+                        </div>
+                        <input type="range" id="bSlider" class="slider-b" min="0" max="255" step="1" value="255">
+                    </div>
+                </div>
+
+                <div class="sep"></div>
+
                 <div class="presets">
                     <button class="preset-btn active" id="resetPosBtn">reset posisi</button>
                     <button class="preset-btn" id="resetSizeBtn">reset ukuran</button>
+                    <button class="preset-btn" id="resetColorBtn">reset warna</button>
                 </div>
 
                 <div class="sep"></div>
@@ -681,7 +797,12 @@
                     </div>
                     <div class="output-sep"></div>
                     <div class="output-line">
-                        <code id="allOutput">Semua: { pos, size }</code>
+                        <code id="colorOutput">Warna: Color3.fromRGB(<span class="num">122</span>, <span class="num">162</span>, <span class="num">255</span>)</code>
+                        <button class="copy-btn" data-copy="color">Salin</button>
+                    </div>
+                    <div class="output-sep"></div>
+                    <div class="output-line">
+                        <code id="allOutput">Semua: { pos, size, color }</code>
                         <button class="copy-btn" data-copy="all">Salin</button>
                     </div>
                 </div>
@@ -698,23 +819,37 @@
             const ySlider = document.getElementById('ySlider');
             const wSlider = document.getElementById('wSlider');
             const hSlider = document.getElementById('hSlider');
+            const rSlider = document.getElementById('rSlider');
+            const gSlider = document.getElementById('gSlider');
+            const bSlider = document.getElementById('bSlider');
             const xVal = document.getElementById('xVal');
             const yVal = document.getElementById('yVal');
             const wVal = document.getElementById('wVal');
             const hVal = document.getElementById('hVal');
+            const rVal = document.getElementById('rVal');
+            const gVal = document.getElementById('gVal');
+            const bVal = document.getElementById('bVal');
             const coordDisplay = document.getElementById('coordDisplay');
             const sizeDisplay = document.getElementById('sizeDisplay');
+            const rgbDisplay = document.getElementById('rgbDisplay');
             const posOutput = document.getElementById('posOutput');
             const sizeOutput = document.getElementById('sizeOutput');
+            const colorOutput = document.getElementById('colorOutput');
             const allOutput = document.getElementById('allOutput');
             const posInput = document.getElementById('posInput');
             const sizeInput = document.getElementById('sizeInput');
+            const colorInput = document.getElementById('colorInput');
+            const colorPicker = document.getElementById('colorPicker');
+            const colorSwatch = document.getElementById('colorSwatch');
             const applyPosBtn = document.getElementById('applyPosBtn');
             const applySizeBtn = document.getElementById('applySizeBtn');
+            const applyColorBtn = document.getElementById('applyColorBtn');
             const posError = document.getElementById('posError');
             const sizeError = document.getElementById('sizeError');
+            const colorError = document.getElementById('colorError');
             const resetPosBtn = document.getElementById('resetPosBtn');
             const resetSizeBtn = document.getElementById('resetSizeBtn');
+            const resetColorBtn = document.getElementById('resetColorBtn');
             const shapeControl = document.getElementById('shapeControl');
             const shapeButtons = shapeControl.querySelectorAll('button');
             const ratioToggle = document.getElementById('ratioToggle');
@@ -723,12 +858,21 @@
 
             const DEFAULT_POS = 0.50;
             const DEFAULT_SIZE = 56;
+            const DEFAULT_RGB = { r: 122, g: 162, b: 255 };
 
             let areaW = 0, areaH = 0;
             let x = DEFAULT_POS, y = DEFAULT_POS;
             let w = DEFAULT_SIZE, h = DEFAULT_SIZE;
             let shape = 'square';
             let lockRatio = false;
+            let r = DEFAULT_RGB.r, g = DEFAULT_RGB.g, b = DEFAULT_RGB.b;
+
+            function rgbToHex(r, g, b) {
+                return '#' + [r, g, b].map(v => {
+                    const hex = v.toString(16);
+                    return hex.length === 1 ? '0' + hex : hex;
+                }).join('');
+            }
 
             function render() {
                 if (areaW === 0 || areaH === 0) return;
@@ -737,6 +881,15 @@
                 target.style.height = h + 'px';
                 target.classList.toggle('shape-square', shape === 'square');
                 target.classList.toggle('shape-circle', shape === 'circle');
+
+                // Warna
+                const rgbStr = `rgb(${r}, ${g}, ${b})`;
+                const hexStr = rgbToHex(r, g, b);
+                target.style.background = rgbStr;
+                target.style.borderColor = `rgba(${r}, ${g}, ${b}, 0.9)`;
+                target.style.boxShadow = `0 0 20px rgba(${r}, ${g}, ${b}, 0.5), inset 0 0 12px rgba(255,255,255,0.08)`;
+                colorSwatch.style.background = rgbStr;
+                if (colorPicker.value !== hexStr) colorPicker.value = hexStr;
 
                 const maxL = Math.max(0, areaW - w);
                 const maxT = Math.max(0, areaH - h);
@@ -750,23 +903,32 @@
 
                 coordDisplay.textContent = `${fx}, ${fy}`;
                 sizeDisplay.textContent = `${fw}, ${fh}`;
+                rgbDisplay.textContent = `${r}, ${g}, ${b}`;
                 xVal.textContent = fx;
                 yVal.textContent = fy;
                 wVal.textContent = fw + ' px';
                 hVal.textContent = fh + ' px';
+                rVal.textContent = r;
+                gVal.textContent = g;
+                bVal.textContent = b;
 
                 posOutput.innerHTML = `Posisi: <span class="label">UDim2.fromScale(</span><span class="num">${fx}</span>, <span class="num">${fy}</span><span class="label">)</span>`;
                 sizeOutput.innerHTML = `Ukuran: <span class="label">UDim2.fromScale(</span><span class="num">${fw}</span>, <span class="num">${fh}</span><span class="label">)</span>`;
-                allOutput.innerHTML = `<span class="label">pos=</span>UDim2.fromScale(<span class="num">${fx}</span>, <span class="num">${fy}</span>) <span class="label">| size=</span>UDim2.fromScale(<span class="num">${fw}</span>, <span class="num">${fh}</span>)`;
+                colorOutput.innerHTML = `Warna: <span class="label">Color3.fromRGB(</span><span class="num">${r}</span>, <span class="num">${g}</span>, <span class="num">${b}</span><span class="label">)</span>`;
+                allOutput.innerHTML = `<span class="label">pos=</span>UDim2.fromScale(<span class="num">${fx}</span>, <span class="num">${fy}</span>) <span class="label">| size=</span>UDim2.fromScale(<span class="num">${fw}</span>, <span class="num">${fh}</span>) <span class="label">| color=</span>Color3.fromRGB(<span class="num">${r}</span>, <span class="num">${g}</span>, <span class="num">${b}</span>)`;
 
                 if (Math.abs(parseFloat(xSlider.value) - x) > 0.001) xSlider.value = x;
                 if (Math.abs(parseFloat(ySlider.value) - y) > 0.001) ySlider.value = y;
                 if (Math.abs(parseFloat(wSlider.value) - w) > 0.5) wSlider.value = w;
                 if (Math.abs(parseFloat(hSlider.value) - h) > 0.5) hSlider.value = h;
+                if (parseInt(rSlider.value, 10) !== r) rSlider.value = r;
+                if (parseInt(gSlider.value, 10) !== g) gSlider.value = g;
+                if (parseInt(bSlider.value, 10) !== b) bSlider.value = b;
 
-                // Highlight tombol reset posisi saat di posisi default
                 const isDefaultPos = Math.abs(x - DEFAULT_POS) < 0.001 && Math.abs(y - DEFAULT_POS) < 0.001;
                 resetPosBtn.classList.toggle('active', isDefaultPos);
+                const isDefaultColor = r === DEFAULT_RGB.r && g === DEFAULT_RGB.g && b === DEFAULT_RGB.b;
+                resetColorBtn.classList.toggle('active', isDefaultColor);
 
                 hGroup.classList.toggle('disabled', lockRatio);
 
@@ -775,6 +937,9 @@
                 }
                 if (document.activeElement !== sizeInput) {
                     sizeInput.value = `UDim2.fromScale(${fw}, ${fh})`;
+                }
+                if (document.activeElement !== colorInput) {
+                    colorInput.value = `Color3.fromRGB(${r}, ${g}, ${b})`;
                 }
             }
 
@@ -800,6 +965,20 @@
                 if (lockRatio) w = h;
                 render();
             });
+            rSlider.addEventListener('input', e => { r = parseInt(e.target.value, 10); render(); });
+            gSlider.addEventListener('input', e => { g = parseInt(e.target.value, 10); render(); });
+            bSlider.addEventListener('input', e => { b = parseInt(e.target.value, 10); render(); });
+
+            colorPicker.addEventListener('input', e => {
+                const hex = e.target.value;
+                const nr = parseInt(hex.slice(1, 3), 16);
+                const ng = parseInt(hex.slice(3, 5), 16);
+                const nb = parseInt(hex.slice(5, 7), 16);
+                r = nr; g = ng; b = nb;
+                colorError.textContent = '';
+                colorInput.classList.remove('invalid');
+                render();
+            });
 
             ratioToggle.addEventListener('change', e => {
                 lockRatio = e.target.checked;
@@ -819,88 +998,97 @@
                 });
             });
 
-            // Reset posisi
-            resetPosBtn.addEventListener('click', () => {
-                x = DEFAULT_POS;
-                y = DEFAULT_POS;
-                render();
-            });
-
-            // Reset ukuran
-            resetSizeBtn.addEventListener('click', () => {
-                w = DEFAULT_SIZE;
-                h = DEFAULT_SIZE;
+            resetPosBtn.addEventListener('click', () => { x = DEFAULT_POS; y = DEFAULT_POS; render(); });
+            resetSizeBtn.addEventListener('click', () => { w = DEFAULT_SIZE; h = DEFAULT_SIZE; render(); });
+            resetColorBtn.addEventListener('click', () => {
+                r = DEFAULT_RGB.r; g = DEFAULT_RGB.g; b = DEFAULT_RGB.b;
                 render();
             });
 
             const POS_REGEX = /^\s*UDim2\.fromScale\s*\(\s*(-?\d*\.?\d+)\s*,\s*(-?\d*\.?\d+)\s*\)\s*$/i;
             const SIZE_REGEX = /^\s*UDim2\.fromScale\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)\s*$/i;
+            const COLOR_REGEX = /^\s*Color3\.fromRGB\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*$/i;
 
             function applyPos() {
                 const val = posInput.value.trim();
                 const m = val.match(POS_REGEX);
-
                 if (!m) {
                     posError.textContent = 'Format: UDim2.fromScale(x, y)';
                     posInput.classList.add('invalid');
                     return;
                 }
-
                 const nx = parseFloat(m[1]);
                 const ny = parseFloat(m[2]);
-
                 if (nx < 0 || nx > 1 || ny < 0 || ny > 1) {
                     posError.textContent = 'Nilai harus 0.0 – 1.0';
                     posInput.classList.add('invalid');
                     return;
                 }
-
                 posError.textContent = '';
                 posInput.classList.remove('invalid');
-                x = nx;
-                y = ny;
+                x = nx; y = ny;
                 render();
             }
 
             function applySize() {
                 const val = sizeInput.value.trim();
                 const m = val.match(SIZE_REGEX);
-
                 if (!m) {
                     sizeError.textContent = 'Format: UDim2.fromScale(w, h) dengan angka bulat';
                     sizeInput.classList.add('invalid');
                     return;
                 }
-
                 const nw = parseInt(m[1], 10);
                 const nh = parseInt(m[2], 10);
-
                 if (nw < 20 || nw > 300 || nh < 20 || nh > 300) {
                     sizeError.textContent = 'Ukuran harus 20 – 300 px';
                     sizeInput.classList.add('invalid');
                     return;
                 }
-
                 sizeError.textContent = '';
                 sizeInput.classList.remove('invalid');
-                w = nw;
-                h = nh;
+                w = nw; h = nh;
                 if (lockRatio) {
                     const size = Math.min(w, h);
-                    w = size;
-                    h = size;
+                    w = size; h = size;
                 }
+                render();
+            }
+
+            function applyColor() {
+                const val = colorInput.value.trim();
+                const m = val.match(COLOR_REGEX);
+                if (!m) {
+                    colorError.textContent = 'Format: Color3.fromRGB(r, g, b)';
+                    colorInput.classList.add('invalid');
+                    return;
+                }
+                const nr = parseInt(m[1], 10);
+                const ng = parseInt(m[2], 10);
+                const nb = parseInt(m[3], 10);
+                if (nr > 255 || ng > 255 || nb > 255) {
+                    colorError.textContent = 'Nilai RGB harus 0 – 255';
+                    colorInput.classList.add('invalid');
+                    return;
+                }
+                colorError.textContent = '';
+                colorInput.classList.remove('invalid');
+                r = nr; g = ng; b = nb;
                 render();
             }
 
             applyPosBtn.addEventListener('click', applyPos);
             applySizeBtn.addEventListener('click', applySize);
+            applyColorBtn.addEventListener('click', applyColor);
 
             posInput.addEventListener('keydown', e => {
                 if (e.key === 'Enter') { e.preventDefault(); applyPos(); }
             });
             sizeInput.addEventListener('keydown', e => {
                 if (e.key === 'Enter') { e.preventDefault(); applySize(); }
+            });
+            colorInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter') { e.preventDefault(); applyColor(); }
             });
 
             posInput.addEventListener('input', () => {
@@ -910,6 +1098,10 @@
             sizeInput.addEventListener('input', () => {
                 sizeError.textContent = '';
                 sizeInput.classList.remove('invalid');
+            });
+            colorInput.addEventListener('input', () => {
+                colorError.textContent = '';
+                colorInput.classList.remove('invalid');
             });
 
             copyBtns.forEach(btn => {
@@ -926,8 +1118,10 @@
                         text = `UDim2.fromScale(${fx}, ${fy})`;
                     } else if (type === 'size') {
                         text = `UDim2.fromScale(${fw}, ${fh})`;
+                    } else if (type === 'color') {
+                        text = `Color3.fromRGB(${r}, ${g}, ${b})`;
                     } else if (type === 'all') {
-                        text = `pos = UDim2.fromScale(${fx}, ${fy})\nsize = UDim2.fromScale(${fw}, ${fh})`;
+                        text = `pos = UDim2.fromScale(${fx}, ${fy})\nsize = UDim2.fromScale(${fw}, ${fh})\ncolor = Color3.fromRGB(${r}, ${g}, ${b})`;
                     }
 
                     try {
