@@ -23,7 +23,6 @@
             overflow-x: hidden;
         }
 
-        /* ===== Panel Glass ===== */
         .panel {
             width: 100%;
             max-width: 520px;
@@ -66,32 +65,43 @@
             box-shadow: 0 0 10px #7aa2ff;
         }
 
-        .coord {
+        /* ===== Info badges (pos + size) ===== */
+        .info-badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
             font-family: 'SF Mono', ui-monospace, 'Courier New', monospace;
-            font-size: 0.75rem;
-            color: #7aa2ff;
-            background: rgba(122, 162, 255, 0.1);
+            font-size: 0.72rem;
             padding: 4px 10px;
             border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            color: #7aa2ff;
+            background: rgba(122, 162, 255, 0.1);
             border: 1px solid rgba(122, 162, 255, 0.2);
         }
 
-        /* ===== Layout utama ===== */
+        .badge-label {
+            opacity: 0.5;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== Layout ===== */
         .layout {
             display: flex;
             flex-direction: column;
             gap: 18px;
         }
 
-        /* Kolom preview */
-        .col-preview {
-            width: 100%;
-        }
-
-        /* Kolom kontrol */
-        .col-controls {
-            width: 100%;
-        }
+        .col-preview { width: 100%; }
+        .col-controls { width: 100%; }
 
         /* ===== Preview area ===== */
         .preview {
@@ -133,14 +143,9 @@
         .shape-square { border-radius: 12px; }
         .shape-circle { border-radius: 50%; }
 
-        /* ===== Input rows ===== */
-        .input-section {
-            margin-bottom: 14px;
-        }
-
-        .input-section:last-of-type {
-            margin-bottom: 0;
-        }
+        /* ===== Input ===== */
+        .input-section { margin-bottom: 14px; }
+        .input-section:last-of-type { margin-bottom: 0; }
 
         .input-label {
             font-size: 0.7rem;
@@ -501,7 +506,7 @@
             pointer-events: none;
         }
 
-        /* ===== Responsive: Desktop / Tablet lebar ===== */
+        /* ===== Responsive ===== */
         @media (min-width: 900px) {
             .panel {
                 max-width: 980px;
@@ -523,21 +528,12 @@
             .preview {
                 aspect-ratio: 16 / 10;
             }
-
-            /* Sembunyikan output di kolom kanan karena sudah ada preview di kiri */
-            .col-preview .preview {
-                margin-bottom: 0;
-            }
         }
 
-        /* Tablet sedang */
         @media (min-width: 640px) and (max-width: 899px) {
-            .panel {
-                max-width: 680px;
-            }
+            .panel { max-width: 680px; }
         }
 
-        /* Mobile kecil */
         @media (max-width: 380px) {
             .panel {
                 padding: 16px;
@@ -549,26 +545,33 @@
                 font-size: 0.75rem;
             }
 
-            .grid-2 {
-                gap: 10px;
-            }
+            .grid-2 { gap: 10px; }
+
+            .badge { font-size: 0.68rem; padding: 3px 8px; }
         }
     </style>
 </head>
 <body>
     <div class="panel">
-        <!-- Header -->
+        <!-- Header dengan badge pos + size (warna sama) -->
         <div class="header">
             <div class="title">
                 <span class="dot"></span>
                 UDim2 Preview
             </div>
-            <div class="coord" id="coordDisplay">0.50, 0.50</div>
+            <div class="info-badges">
+                <div class="badge">
+                    <span class="badge-label">pos</span>
+                    <span id="coordDisplay">0.50, 0.50</span>
+                </div>
+                <div class="badge">
+                    <span class="badge-label">size</span>
+                    <span id="sizeDisplay">56, 56</span>
+                </div>
+            </div>
         </div>
 
-        <!-- Layout: preview kiri, kontrol kanan (desktop) -->
         <div class="layout">
-
             <!-- ===== Kolom Preview ===== -->
             <div class="col-preview">
                 <div class="preview" id="preview">
@@ -579,7 +582,6 @@
             <!-- ===== Kolom Kontrol ===== -->
             <div class="col-controls">
 
-                <!-- Input Posisi -->
                 <div class="input-section">
                     <div class="input-label">Input Posisi</div>
                     <div class="input-row">
@@ -589,7 +591,6 @@
                     <div class="error" id="posError"></div>
                 </div>
 
-                <!-- Input Ukuran -->
                 <div class="input-section">
                     <div class="input-label">Input Ukuran (px)</div>
                     <div class="input-row">
@@ -601,7 +602,6 @@
 
                 <div class="sep"></div>
 
-                <!-- Posisi -->
                 <div class="section-label">Posisi</div>
                 <div class="grid-2">
                     <div class="slider-group">
@@ -622,7 +622,6 @@
 
                 <div class="sep"></div>
 
-                <!-- Bentuk -->
                 <div class="section-label">Bentuk</div>
                 <div class="segmented" id="shapeControl">
                     <button class="active" data-shape="square">
@@ -635,7 +634,6 @@
 
                 <div class="sep"></div>
 
-                <!-- Ukuran -->
                 <div class="section-label">Ukuran</div>
                 <div class="grid-2">
                     <div class="slider-group" id="wGroup">
@@ -705,6 +703,7 @@
             const wVal = document.getElementById('wVal');
             const hVal = document.getElementById('hVal');
             const coordDisplay = document.getElementById('coordDisplay');
+            const sizeDisplay = document.getElementById('sizeDisplay');
             const posOutput = document.getElementById('posOutput');
             const sizeOutput = document.getElementById('sizeOutput');
             const allOutput = document.getElementById('allOutput');
@@ -748,6 +747,7 @@
                 const fh = h.toFixed(0);
 
                 coordDisplay.textContent = `${fx}, ${fy}`;
+                sizeDisplay.textContent = `${fw}, ${fh}`;
                 xVal.textContent = fx;
                 yVal.textContent = fy;
                 wVal.textContent = fw + ' px';
@@ -770,7 +770,6 @@
 
                 hGroup.classList.toggle('disabled', lockRatio);
 
-                // Sync input fields
                 if (document.activeElement !== posInput) {
                     posInput.value = `UDim2.fromScale(${fx}, ${fy})`;
                 }
@@ -789,7 +788,6 @@
                 }
             }
 
-            // Sliders
             xSlider.addEventListener('input', e => { x = parseFloat(e.target.value); render(); });
             ySlider.addEventListener('input', e => { y = parseFloat(e.target.value); render(); });
             wSlider.addEventListener('input', e => {
@@ -803,7 +801,6 @@
                 render();
             });
 
-            // Ratio toggle
             ratioToggle.addEventListener('change', e => {
                 lockRatio = e.target.checked;
                 if (lockRatio) {
@@ -814,7 +811,6 @@
                 render();
             });
 
-            // Shape
             shapeButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     shape = btn.dataset.shape;
@@ -823,7 +819,6 @@
                 });
             });
 
-            // Presets
             presetBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     x = parseFloat(btn.dataset.x);
@@ -838,7 +833,6 @@
                 render();
             });
 
-            // Regex
             const POS_REGEX = /^\s*UDim2\.fromScale\s*\(\s*(-?\d*\.?\d+)\s*,\s*(-?\d*\.?\d+)\s*\)\s*$/i;
             const SIZE_REGEX = /^\s*UDim2\.fromScale\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)\s*$/i;
 
@@ -918,7 +912,6 @@
                 sizeInput.classList.remove('invalid');
             });
 
-            // Copy buttons
             copyBtns.forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const type = btn.dataset.copy;
@@ -950,7 +943,6 @@
                 });
             });
 
-            // Resize observer
             new ResizeObserver(measure).observe(preview);
             window.addEventListener('resize', measure);
             window.addEventListener('load', measure);
