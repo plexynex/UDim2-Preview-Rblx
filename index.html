@@ -468,7 +468,7 @@
             margin: 16px 0;
         }
 
-        /* ===== Presets (semua warna sama #7aa2ff) ===== */
+        /* ===== Presets ===== */
         .presets {
             display: flex;
             gap: 8px;
@@ -662,11 +662,11 @@
                     <div class="error" id="posError"></div>
                 </div>
 
-                <!-- Input Ukuran -->
+                <!-- Input Ukuran (sekarang fromOffset) -->
                 <div class="input-section">
                     <div class="input-label">Input Ukuran (px)</div>
                     <div class="input-row">
-                        <input type="text" id="sizeInput" value="UDim2.fromScale(56, 56)" spellcheck="false">
+                        <input type="text" id="sizeInput" value="UDim2.fromOffset(56, 56)" spellcheck="false">
                         <button id="applySizeBtn">Preview</button>
                     </div>
                     <div class="error" id="sizeError"></div>
@@ -794,7 +794,7 @@
                     </div>
                     <div class="output-sep"></div>
                     <div class="output-line">
-                        <code id="sizeOutput">Ukuran: UDim2.fromScale(<span class="num">56</span>, <span class="num">56</span>)</code>
+                        <code id="sizeOutput">Ukuran: UDim2.fromOffset(<span class="num">56</span>, <span class="num">56</span>)</code>
                         <button class="copy-btn" data-copy="size">Salin</button>
                     </div>
                     <div class="output-sep"></div>
@@ -916,9 +916,10 @@
                 bVal.textContent = b;
 
                 posOutput.innerHTML = `Posisi: <span class="label">UDim2.fromScale(</span><span class="num">${fx}</span>, <span class="num">${fy}</span><span class="label">)</span>`;
-                sizeOutput.innerHTML = `Ukuran: <span class="label">UDim2.fromScale(</span><span class="num">${fw}</span>, <span class="num">${fh}</span><span class="label">)</span>`;
+                // Gunakan fromOffset untuk ukuran
+                sizeOutput.innerHTML = `Ukuran: <span class="label">UDim2.fromOffset(</span><span class="num">${fw}</span>, <span class="num">${fh}</span><span class="label">)</span>`;
                 colorOutput.innerHTML = `Warna: <span class="label">Color3.fromRGB(</span><span class="num">${r}</span>, <span class="num">${g}</span>, <span class="num">${b}</span><span class="label">)</span>`;
-                allOutput.innerHTML = `<span class="label">pos=</span>UDim2.fromScale(<span class="num">${fx}</span>, <span class="num">${fy}</span>) <span class="label">| size=</span>UDim2.fromScale(<span class="num">${fw}</span>, <span class="num">${fh}</span>) <span class="label">| color=</span>Color3.fromRGB(<span class="num">${r}</span>, <span class="num">${g}</span>, <span class="num">${b}</span>)`;
+                allOutput.innerHTML = `<span class="label">pos=</span>UDim2.fromScale(<span class="num">${fx}</span>, <span class="num">${fy}</span>) <span class="label">| size=</span>UDim2.fromOffset(<span class="num">${fw}</span>, <span class="num">${fh}</span>) <span class="label">| color=</span>Color3.fromRGB(<span class="num">${r}</span>, <span class="num">${g}</span>, <span class="num">${b}</span>)`;
 
                 if (Math.abs(parseFloat(xSlider.value) - x) > 0.001) xSlider.value = x;
                 if (Math.abs(parseFloat(ySlider.value) - y) > 0.001) ySlider.value = y;
@@ -941,7 +942,8 @@
                     posInput.value = `UDim2.fromScale(${fx}, ${fy})`;
                 }
                 if (document.activeElement !== sizeInput) {
-                    sizeInput.value = `UDim2.fromScale(${fw}, ${fh})`;
+                    // Gunakan fromOffset untuk ukuran
+                    sizeInput.value = `UDim2.fromOffset(${fw}, ${fh})`;
                 }
                 if (document.activeElement !== colorInput) {
                     colorInput.value = `Color3.fromRGB(${r}, ${g}, ${b})`;
@@ -1010,8 +1012,10 @@
                 render();
             });
 
+            // Regex: posisi tetap fromScale
             const POS_REGEX = /^\s*UDim2\.fromScale\s*\(\s*(-?\d*\.?\d+)\s*,\s*(-?\d*\.?\d+)\s*\)\s*$/i;
-            const SIZE_REGEX = /^\s*UDim2\.fromScale\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)\s*$/i;
+            // Ukuran menggunakan fromOffset
+            const SIZE_REGEX = /^\s*UDim2\.fromOffset\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)\s*$/i;
             const COLOR_REGEX = /^\s*Color3\.fromRGB\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*$/i;
 
             function applyPos() {
@@ -1039,7 +1043,7 @@
                 const val = sizeInput.value.trim();
                 const m = val.match(SIZE_REGEX);
                 if (!m) {
-                    sizeError.textContent = 'Format: UDim2.fromScale(w, h) dengan angka bulat';
+                    sizeError.textContent = 'Format: UDim2.fromOffset(w, h) dengan angka bulat';
                     sizeInput.classList.add('invalid');
                     return;
                 }
@@ -1122,11 +1126,12 @@
                     if (type === 'pos') {
                         text = `UDim2.fromScale(${fx}, ${fy})`;
                     } else if (type === 'size') {
-                        text = `UDim2.fromScale(${fw}, ${fh})`;
+                        // Ukuran disalin sebagai fromOffset
+                        text = `UDim2.fromOffset(${fw}, ${fh})`;
                     } else if (type === 'color') {
                         text = `Color3.fromRGB(${r}, ${g}, ${b})`;
                     } else if (type === 'all') {
-                        text = `pos = UDim2.fromScale(${fx}, ${fy})\nsize = UDim2.fromScale(${fw}, ${fh})\ncolor = Color3.fromRGB(${r}, ${g}, ${b})`;
+                        text = `pos = UDim2.fromScale(${fx}, ${fy})\nsize = UDim2.fromOffset(${fw}, ${fh})\ncolor = Color3.fromRGB(${r}, ${g}, ${b})`;
                     }
 
                     try {
