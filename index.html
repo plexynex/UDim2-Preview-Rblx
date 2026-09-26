@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDim2 Preview</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #fff;
+            background: radial-gradient(circle at 20% 10%, #2a2a45 0%, #0d0d17 55%, #05050a 100%);
+            overflow-x: hidden;
+        }
+
+        .panel {
+            width: 100%;
+            max-width: 520px;
+            background: rgba(20, 20, 30, 0.55);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 18px;
+        }
+
+        .title {
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            color: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #7aa2ff;
+            box-shadow: 0 0 10px #7aa2ff;
+        }
+
+        .coord {
+            font-family: 'SF Mono', ui-monospace, 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: #7aa2ff;
+            background: rgba(122, 162, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(122, 162, 255, 0.2);
+        }
+
+        .preview {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 18px;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .target {
+            position: absolute;
+            background: rgba(122, 162, 255, 0.25);
+            border: 1.5px solid #7aa2ff;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(122, 162, 255, 0.4),
+                        inset 0 0 12px rgba(122, 162, 255, 0.15);
+            transition: left 0.06s linear, top 0.06s linear,
+                        width 0.08s ease, height 0.08s ease,
+                        border-radius 0.15s ease;
+            will-change: left, top, width, height;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+        }
+
+        .shape-square { border-radius: 12px; }
+        .shape-circle { border-radius: 50%; }
+
+        /* Input rows */
+        .input-section {
+            margin-bottom: 14px;
+        }
+
+        .input-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 6px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-row input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 9px 12px;
+            color: #fff;
+            font-family: 'SF Mono', ui-monospace, 'Courier New', monospace;
+            font-size: 0.8rem;
+            outline: none;
+            transition: 0.15s;
+            width: 100%;
+        }
+
+        .input-row input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .input-row input:focus {
+            border-color: rgba(122, 162, 255, 0.6);
+            background: rgba(122, 162, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(122, 162, 255, 0.12);
+        }
+
+        .input-row input.invalid {
+            border-color: rgba(255, 138, 138, 0.6);
+            background: rgba(255, 138, 138, 0.08);
+        }
+
+        .input-row button {
+            background: rgba(122, 162, 255, 0.9);
+            border: none;
+            color: #0d0d17;
+            padding: 9px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.15s;
+            white-space: nowrap;
+        }
+
+        .input-row button:hover {
+            background: #7aa2ff;
+            box-shadow: 0 0 16px rgba(122, 162, 255, 0.5);
+        }
+
+        .input-row button:active { transform: scale(0.97); }
+
+        .error {
+            font-size: 0.72rem;
+            color: #ff8a8a;
+            min-height: 0;
+            margin-top: 6px;
+            font-family: 'SF Mono', ui-monospace, monospace;
+        }
+
+        .error:not(:empty) {
+            min-height: 1em;
+        }
+
+        /* Section label */
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.35);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .slider-group { margin-bottom: 14px; }
+        .slider-group:last-child { margin-bottom: 0; }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+        }
+
+        .slider-header span:first-child {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        .slider-header span:last-child {
+            font-family: 'SF Mono', ui-monospace, monospace;
+            color: #7aa2ff;
+            font-size: 0.8rem;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #7aa2ff;
+            border-radius: 50%;
+            border: 2px solid #0d0d17;
+            box-shadow: 0 0 10px rgba(122, 162, 255, 0.6);
+            cursor: grab;
+            transition: 0.1s;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+        input[type=range]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #7aa2ff;
+            border-radius: 50%;
+            border: 2px solid #0d0d17;
+            box-shadow: 0 0 10px rgba(122, 162, 255, 0.6);
+            cursor: grab;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .toggle-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        .toggle {
+            position: relative;
+            width: 42px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            left: 3px;
+            top: 3px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .toggle input:checked + .toggle-slider {
+            background: rgba(122, 162, 255, 0.5);
+            border-color: rgba(122, 162, 255, 0.7);
+        }
+
+        .toggle input:checked + .toggle-slider::before {
+            transform: translateX(18px);
+            background: #7aa2ff;
+            box-shadow: 0 0 8px rgba(122, 162, 255, 0.8);
+        }
+
+        .segmented {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .segmented button {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 7px 10px;
+            border-radius: 7px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .segmented button:hover { color: #fff; }
+
+        .segmented button.active {
+            background: rgba(122, 162, 255, 0.18);
+            color: #7aa2ff;
+            box-shadow: inset 0 0 0 1px rgba(122, 162, 255, 0.4);
+        }
+
+        .segmented .icon {
+            width: 12px;
+            height: 12px;
+            border: 1.5px solid currentColor;
+        }
+
+        .segmented .icon.square { border-radius: 2px; }
+        .segmented .icon.circle { border-radius: 50%; }
+
+        .sep {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 16px 0;
+        }
+
+        .presets {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            font-family: 'SF Mono', ui-monospace, monospace;
+            cursor: pointer;
+            transition: 0.15s;
+            white-space: nowrap;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(122, 162, 255, 0.4);
+            color: #fff;
+        }
+
+        .preset-btn.active {
+            background: rgba(122, 162, 255, 0.15);
+            border-color: rgba(122, 162, 255, 0.6);
+            color: #7aa2ff;
+        }
+
+        .output {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .output-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .output-line code {
+            font-family: 'SF Mono', ui-monospace, 'Courier New', monospace;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.9);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .output-line code .num {
+            color: #7aa2ff;
+        }
+
+        .output-line code .label {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .output-sep {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.15s;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: rgba(122, 162, 255, 0.15);
+            border-color: rgba(122, 162, 255, 0.4);
+            color: #fff;
+        }
+
+        .copy-btn.copied {
+            background: rgba(122, 162, 255, 0.9);
+            color: #0d0d17;
+            border-color: #7aa2ff;
+        }
+
+        .slider-group.disabled {
+            opacity: 0.35;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="panel">
+        <div class="header">
+            <div class="title">
+                <span class="dot"></span>
+                UDim2 Preview
+            </div>
+            <div class="coord" id="coordDisplay">0.50, 0.50</div>
+        </div>
+
+        <div class="preview" id="preview">
+            <div class="target shape-square" id="target">🎯</div>
+        </div>
+
+        <!-- Input Posisi -->
+        <div class="input-section">
+            <div class="input-label">Input Posisi</div>
+            <div class="input-row">
+                <input type="text" id="posInput" value="UDim2.fromScale(0.50, 0.50)" spellcheck="false">
+                <button id="applyPosBtn">Preview</button>
+            </div>
+            <div class="error" id="posError"></div>
+        </div>
+
+        <!-- Input Ukuran -->
+        <div class="input-section">
+            <div class="input-label">Input Ukuran (px)</div>
+            <div class="input-row">
+                <input type="text" id="sizeInput" value="UDim2.fromScale(56, 56)" spellcheck="false">
+                <button id="applySizeBtn">Preview</button>
+            </div>
+            <div class="error" id="sizeError"></div>
+        </div>
+
+        <div class="sep"></div>
+
+        <!-- Posisi -->
+        <div class="section-label">Posisi</div>
+        <div class="grid-2">
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span>X</span>
+                    <span id="xVal">0.50</span>
+                </div>
+                <input type="range" id="xSlider" min="0" max="1" step="0.01" value="0.50">
+            </div>
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span>Y</span>
+                    <span id="yVal">0.50</span>
+                </div>
+                <input type="range" id="ySlider" min="0" max="1" step="0.01" value="0.50">
+            </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <!-- Bentuk -->
+        <div class="section-label">Bentuk</div>
+        <div class="segmented" id="shapeControl">
+            <button class="active" data-shape="square">
+                <span class="icon square"></span> Kotak
+            </button>
+            <button data-shape="circle">
+                <span class="icon circle"></span> Bulat
+            </button>
+        </div>
+
+        <div class="sep"></div>
+
+        <!-- Ukuran -->
+        <div class="section-label">Ukuran</div>
+        <div class="grid-2">
+            <div class="slider-group" id="wGroup">
+                <div class="slider-header">
+                    <span>Width</span>
+                    <span id="wVal">56 px</span>
+                </div>
+                <input type="range" id="wSlider" min="20" max="300" step="1" value="56">
+            </div>
+            <div class="slider-group" id="hGroup">
+                <div class="slider-header">
+                    <span>Height</span>
+                    <span id="hVal">56 px</span>
+                </div>
+                <input type="range" id="hSlider" min="20" max="300" step="1" value="56">
+            </div>
+        </div>
+
+        <div class="toggle-row">
+            <span class="toggle-label">Kunci rasio 1:1</span>
+            <label class="toggle">
+                <input type="checkbox" id="ratioToggle">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="presets">
+            <button class="preset-btn active" data-x="0.50" data-y="0.50">default (0.50, 0.50)</button>
+            <button class="preset-btn" id="resetSizeBtn">reset ukuran</button>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="output">
+            <div class="output-line">
+                <code id="posOutput">Posisi: UDim2.fromScale(<span class="num">0.50</span>, <span class="num">0.50</span>)</code>
+                <button class="copy-btn" data-copy="pos">Salin</button>
+            </div>
+            <div class="output-sep"></div>
+            <div class="output-line">
+                <code id="sizeOutput">Ukuran: UDim2.fromScale(<span class="num">56</span>, <span class="num">56</span>)</code>
+                <button class="copy-btn" data-copy="size">Salin</button>
+            </div>
+            <div class="output-sep"></div>
+            <div class="output-line">
+                <code id="allOutput">Semua: { pos, size }</code>
+                <button class="copy-btn" data-copy="all">Salin</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const preview = document.getElementById('preview');
+            const target = document.getElementById('target');
+            const xSlider = document.getElementById('xSlider');
+            const ySlider = document.getElementById('ySlider');
+            const wSlider = document.getElementById('wSlider');
+            const hSlider = document.getElementById('hSlider');
+            const xVal = document.getElementById('xVal');
+            const yVal = document.getElementById('yVal');
+            const wVal = document.getElementById('wVal');
+            const hVal = document.getElementById('hVal');
+            const coordDisplay = document.getElementById('coordDisplay');
+            const posOutput = document.getElementById('posOutput');
+            const sizeOutput = document.getElementById('sizeOutput');
+            const allOutput = document.getElementById('allOutput');
+            const posInput = document.getElementById('posInput');
+            const sizeInput = document.getElementById('sizeInput');
+            const applyPosBtn = document.getElementById('applyPosBtn');
+            const applySizeBtn = document.getElementById('applySizeBtn');
+            const posError = document.getElementById('posError');
+            const sizeError = document.getElementById('sizeError');
+            const presetBtns = document.querySelectorAll('.preset-btn[data-x]');
+            const resetSizeBtn = document.getElementById('resetSizeBtn');
+            const shapeControl = document.getElementById('shapeControl');
+            const shapeButtons = shapeControl.querySelectorAll('button');
+            const ratioToggle = document.getElementById('ratioToggle');
+            const hGroup = document.getElementById('hGroup');
+            const copyBtns = document.querySelectorAll('.copy-btn[data-copy]');
+
+            const DEFAULT_SIZE = 56;
+            let areaW = 0, areaH = 0;
+            let x = 0.50, y = 0.50;
+            let w = DEFAULT_SIZE, h = DEFAULT_SIZE;
+            let shape = 'square';
+            let lockRatio = false;
+
+            function render() {
+                if (areaW === 0 || areaH === 0) return;
+
+                target.style.width = w + 'px';
+                target.style.height = h + 'px';
+                target.classList.toggle('shape-square', shape === 'square');
+                target.classList.toggle('shape-circle', shape === 'circle');
+
+                const maxL = Math.max(0, areaW - w);
+                const maxT = Math.max(0, areaH - h);
+                target.style.left = (maxL * x) + 'px';
+                target.style.top  = (maxT * y) + 'px';
+
+                const fx = x.toFixed(2);
+                const fy = y.toFixed(2);
+                const fw = w.toFixed(0);
+                const fh = h.toFixed(0);
+
+                coordDisplay.textContent = `${fx}, ${fy}`;
+                xVal.textContent = fx;
+                yVal.textContent = fy;
+                wVal.textContent = fw + ' px';
+                hVal.textContent = fh + ' px';
+
+                posOutput.innerHTML = `Posisi: <span class="label">UDim2.fromScale(</span><span class="num">${fx}</span>, <span class="num">${fy}</span><span class="label">)</span>`;
+                sizeOutput.innerHTML = `Ukuran: <span class="label">UDim2.fromScale(</span><span class="num">${fw}</span>, <span class="num">${fh}</span><span class="label">)</span>`;
+                allOutput.innerHTML = `<span class="label">pos=</span>UDim2.fromScale(<span class="num">${fx}</span>, <span class="num">${fy}</span>) <span class="label">| size=</span>UDim2.fromScale(<span class="num">${fw}</span>, <span class="num">${fh}</span>)`;
+
+                if (Math.abs(parseFloat(xSlider.value) - x) > 0.001) xSlider.value = x;
+                if (Math.abs(parseFloat(ySlider.value) - y) > 0.001) ySlider.value = y;
+                if (Math.abs(parseFloat(wSlider.value) - w) > 0.5) wSlider.value = w;
+                if (Math.abs(parseFloat(hSlider.value) - h) > 0.5) hSlider.value = h;
+
+                presetBtns.forEach(btn => {
+                    const bx = parseFloat(btn.dataset.x);
+                    const by = parseFloat(btn.dataset.y);
+                    btn.classList.toggle('active', Math.abs(bx - x) < 0.001 && Math.abs(by - y) < 0.001);
+                });
+
+                hGroup.classList.toggle('disabled', lockRatio);
+
+                // Sync input fields dengan nilai saat ini
+                posInput.value = `UDim2.fromScale(${fx}, ${fy})`;
+                sizeInput.value = `UDim2.fromScale(${fw}, ${fh})`;
+            }
+
+            function measure() {
+                const cw = preview.clientWidth;
+                const ch = preview.clientHeight;
+                if (cw > 0 && ch > 0) {
+                    areaW = cw;
+                    areaH = ch;
+                    render();
+                }
+            }
+
+            // Sliders
+            xSlider.addEventListener('input', e => { x = parseFloat(e.target.value); render(); });
+            ySlider.addEventListener('input', e => { y = parseFloat(e.target.value); render(); });
+            wSlider.addEventListener('input', e => {
+                w = parseFloat(e.target.value);
+                if (lockRatio) h = w;
+                render();
+            });
+            hSlider.addEventListener('input', e => {
+                h = parseFloat(e.target.value);
+                if (lockRatio) w = h;
+                render();
+            });
+
+            // Ratio toggle
+            ratioToggle.addEventListener('change', e => {
+                lockRatio = e.target.checked;
+                if (lockRatio) {
+                    const size = Math.min(w, h);
+                    w = size;
+                    h = size;
+                }
+                render();
+            });
+
+            // Shape
+            shapeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    shape = btn.dataset.shape;
+                    shapeButtons.forEach(b => b.classList.toggle('active', b === btn));
+                    render();
+                });
+            });
+
+            // Presets
+            presetBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    x = parseFloat(btn.dataset.x);
+                    y = parseFloat(btn.dataset.y);
+                    render();
+                });
+            });
+
+            resetSizeBtn.addEventListener('click', () => {
+                w = DEFAULT_SIZE;
+                h = DEFAULT_SIZE;
+                render();
+            });
+
+            // Regex
+            const POS_REGEX = /^\s*UDim2\.fromScale\s*\(\s*(-?\d*\.?\d+)\s*,\s*(-?\d*\.?\d+)\s*\)\s*$/i;
+            const SIZE_REGEX = /^\s*UDim2\.fromScale\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)\s*$/i;
+
+            // Apply posisi
+            function applyPos() {
+                const val = posInput.value.trim();
+                const m = val.match(POS_REGEX);
+
+                if (!m) {
+                    posError.textContent = 'Format: UDim2.fromScale(x, y)';
+                    posInput.classList.add('invalid');
+                    return;
+                }
+
+                const nx = parseFloat(m[1]);
+                const ny = parseFloat(m[2]);
+
+                if (nx < 0 || nx > 1 || ny < 0 || ny > 1) {
+                    posError.textContent = 'Nilai harus 0.0 – 1.0';
+                    posInput.classList.add('invalid');
+                    return;
+                }
+
+                posError.textContent = '';
+                posInput.classList.remove('invalid');
+                x = nx;
+                y = ny;
+                render();
+            }
+
+            // Apply ukuran
+            function applySize() {
+                const val = sizeInput.value.trim();
+                const m = val.match(SIZE_REGEX);
+
+                if (!m) {
+                    sizeError.textContent = 'Format: UDim2.fromScale(w, h) dengan angka bulat';
+                    sizeInput.classList.add('invalid');
+                    return;
+                }
+
+                const nw = parseInt(m[1], 10);
+                const nh = parseInt(m[2], 10);
+
+                if (nw < 20 || nw > 300 || nh < 20 || nh > 300) {
+                    sizeError.textContent = 'Ukuran harus 20 – 300 px';
+                    sizeInput.classList.add('invalid');
+                    return;
+                }
+
+                sizeError.textContent = '';
+                sizeInput.classList.remove('invalid');
+                w = nw;
+                h = nh;
+                if (lockRatio) {
+                    const size = Math.min(w, h);
+                    w = size;
+                    h = size;
+                }
+                render();
+            }
+
+            applyPosBtn.addEventListener('click', applyPos);
+            applySizeBtn.addEventListener('click', applySize);
+
+            posInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter') { e.preventDefault(); applyPos(); }
+            });
+            sizeInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter') { e.preventDefault(); applySize(); }
+            });
+
+            posInput.addEventListener('input', () => {
+                posError.textContent = '';
+                posInput.classList.remove('invalid');
+            });
+            sizeInput.addEventListener('input', () => {
+                sizeError.textContent = '';
+                sizeInput.classList.remove('invalid');
+            });
+
+            // Copy buttons
+            copyBtns.forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const type = btn.dataset.copy;
+                    let text = '';
+
+                    const fx = x.toFixed(2);
+                    const fy = y.toFixed(2);
+                    const fw = w.toFixed(0);
+                    const fh = h.toFixed(0);
+
+                    if (type === 'pos') {
+                        text = `UDim2.fromScale(${fx}, ${fy})`;
+                    } else if (type === 'size') {
+                        text = `UDim2.fromScale(${fw}, ${fh})`;
+                    } else if (type === 'all') {
+                        text = `pos = UDim2.fromScale(${fx}, ${fy})\nsize = UDim2.fromScale(${fw}, ${fh})`;
+                    }
+
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        const original = btn.textContent;
+                        btn.textContent = '✓';
+                        btn.classList.add('copied');
+                        setTimeout(() => {
+                            btn.textContent = original;
+                            btn.classList.remove('copied');
+                        }, 1200);
+                    } catch (err) { /* silent */ }
+                });
+            });
+
+            // Resize observer
+            new ResizeObserver(measure).observe(preview);
+            window.addEventListener('resize', measure);
+            window.addEventListener('load', measure);
+
+            setTimeout(measure, 0);
+            measure();
+        })();
+    </script>
+</body>
+</html>
