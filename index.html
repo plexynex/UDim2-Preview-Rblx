@@ -23,6 +23,7 @@
             overflow-x: hidden;
         }
 
+        /* ===== Panel Glass ===== */
         .panel {
             width: 100%;
             max-width: 520px;
@@ -34,8 +35,10 @@
             padding: 22px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55),
                         inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            transition: max-width 0.3s ease;
         }
 
+        /* ===== Header ===== */
         .header {
             display: flex;
             align-items: center;
@@ -73,6 +76,24 @@
             border: 1px solid rgba(122, 162, 255, 0.2);
         }
 
+        /* ===== Layout utama ===== */
+        .layout {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* Kolom preview */
+        .col-preview {
+            width: 100%;
+        }
+
+        /* Kolom kontrol */
+        .col-controls {
+            width: 100%;
+        }
+
+        /* ===== Preview area ===== */
         .preview {
             width: 100%;
             aspect-ratio: 16 / 9;
@@ -81,7 +102,6 @@
             border-radius: 14px;
             position: relative;
             overflow: hidden;
-            margin-bottom: 18px;
             background-image:
                 linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
@@ -113,9 +133,13 @@
         .shape-square { border-radius: 12px; }
         .shape-circle { border-radius: 50%; }
 
-        /* Input rows */
+        /* ===== Input rows ===== */
         .input-section {
             margin-bottom: 14px;
+        }
+
+        .input-section:last-of-type {
+            margin-bottom: 0;
         }
 
         .input-label {
@@ -144,11 +168,10 @@
             outline: none;
             transition: 0.15s;
             width: 100%;
+            min-width: 0;
         }
 
-        .input-row input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
-        }
+        .input-row input::placeholder { color: rgba(255, 255, 255, 0.3); }
 
         .input-row input:focus {
             border-color: rgba(122, 162, 255, 0.6);
@@ -189,11 +212,9 @@
             font-family: 'SF Mono', ui-monospace, monospace;
         }
 
-        .error:not(:empty) {
-            min-height: 1em;
-        }
+        .error:not(:empty) { min-height: 1em; }
 
-        /* Section label */
+        /* ===== Section label ===== */
         .section-label {
             font-size: 0.7rem;
             font-weight: 600;
@@ -275,6 +296,7 @@
             cursor: grab;
         }
 
+        /* ===== Toggle ===== */
         .toggle-row {
             display: flex;
             align-items: center;
@@ -295,11 +317,7 @@
             flex-shrink: 0;
         }
 
-        .toggle input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+        .toggle input { opacity: 0; width: 0; height: 0; }
 
         .toggle-slider {
             position: absolute;
@@ -334,6 +352,7 @@
             box-shadow: 0 0 8px rgba(122, 162, 255, 0.8);
         }
 
+        /* ===== Segmented ===== */
         .segmented {
             display: flex;
             gap: 4px;
@@ -383,6 +402,7 @@
             margin: 16px 0;
         }
 
+        /* ===== Presets ===== */
         .presets {
             display: flex;
             gap: 8px;
@@ -416,6 +436,7 @@
             color: #7aa2ff;
         }
 
+        /* ===== Output ===== */
         .output {
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -442,13 +463,8 @@
             white-space: nowrap;
         }
 
-        .output-line code .num {
-            color: #7aa2ff;
-        }
-
-        .output-line code .label {
-            color: rgba(255, 255, 255, 0.4);
-        }
+        .output-line code .num { color: #7aa2ff; }
+        .output-line code .label { color: rgba(255, 255, 255, 0.4); }
 
         .output-sep {
             height: 1px;
@@ -484,10 +500,64 @@
             opacity: 0.35;
             pointer-events: none;
         }
+
+        /* ===== Responsive: Desktop / Tablet lebar ===== */
+        @media (min-width: 900px) {
+            .panel {
+                max-width: 980px;
+                padding: 26px;
+            }
+
+            .layout {
+                display: grid;
+                grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+                gap: 26px;
+                align-items: start;
+            }
+
+            .col-preview {
+                position: sticky;
+                top: 20px;
+            }
+
+            .preview {
+                aspect-ratio: 16 / 10;
+            }
+
+            /* Sembunyikan output di kolom kanan karena sudah ada preview di kiri */
+            .col-preview .preview {
+                margin-bottom: 0;
+            }
+        }
+
+        /* Tablet sedang */
+        @media (min-width: 640px) and (max-width: 899px) {
+            .panel {
+                max-width: 680px;
+            }
+        }
+
+        /* Mobile kecil */
+        @media (max-width: 380px) {
+            .panel {
+                padding: 16px;
+                border-radius: 16px;
+            }
+
+            .input-row button {
+                padding: 9px 12px;
+                font-size: 0.75rem;
+            }
+
+            .grid-2 {
+                gap: 10px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="panel">
+        <!-- Header -->
         <div class="header">
             <div class="title">
                 <span class="dot"></span>
@@ -496,116 +566,128 @@
             <div class="coord" id="coordDisplay">0.50, 0.50</div>
         </div>
 
-        <div class="preview" id="preview">
-            <div class="target shape-square" id="target">🎯</div>
-        </div>
+        <!-- Layout: preview kiri, kontrol kanan (desktop) -->
+        <div class="layout">
 
-        <!-- Input Posisi -->
-        <div class="input-section">
-            <div class="input-label">Input Posisi</div>
-            <div class="input-row">
-                <input type="text" id="posInput" value="UDim2.fromScale(0.50, 0.50)" spellcheck="false">
-                <button id="applyPosBtn">Preview</button>
-            </div>
-            <div class="error" id="posError"></div>
-        </div>
-
-        <!-- Input Ukuran -->
-        <div class="input-section">
-            <div class="input-label">Input Ukuran (px)</div>
-            <div class="input-row">
-                <input type="text" id="sizeInput" value="UDim2.fromScale(56, 56)" spellcheck="false">
-                <button id="applySizeBtn">Preview</button>
-            </div>
-            <div class="error" id="sizeError"></div>
-        </div>
-
-        <div class="sep"></div>
-
-        <!-- Posisi -->
-        <div class="section-label">Posisi</div>
-        <div class="grid-2">
-            <div class="slider-group">
-                <div class="slider-header">
-                    <span>X</span>
-                    <span id="xVal">0.50</span>
+            <!-- ===== Kolom Preview ===== -->
+            <div class="col-preview">
+                <div class="preview" id="preview">
+                    <div class="target shape-square" id="target">🎯</div>
                 </div>
-                <input type="range" id="xSlider" min="0" max="1" step="0.01" value="0.50">
             </div>
-            <div class="slider-group">
-                <div class="slider-header">
-                    <span>Y</span>
-                    <span id="yVal">0.50</span>
+
+            <!-- ===== Kolom Kontrol ===== -->
+            <div class="col-controls">
+
+                <!-- Input Posisi -->
+                <div class="input-section">
+                    <div class="input-label">Input Posisi</div>
+                    <div class="input-row">
+                        <input type="text" id="posInput" value="UDim2.fromScale(0.50, 0.50)" spellcheck="false">
+                        <button id="applyPosBtn">Preview</button>
+                    </div>
+                    <div class="error" id="posError"></div>
                 </div>
-                <input type="range" id="ySlider" min="0" max="1" step="0.01" value="0.50">
-            </div>
-        </div>
 
-        <div class="sep"></div>
-
-        <!-- Bentuk -->
-        <div class="section-label">Bentuk</div>
-        <div class="segmented" id="shapeControl">
-            <button class="active" data-shape="square">
-                <span class="icon square"></span> Kotak
-            </button>
-            <button data-shape="circle">
-                <span class="icon circle"></span> Bulat
-            </button>
-        </div>
-
-        <div class="sep"></div>
-
-        <!-- Ukuran -->
-        <div class="section-label">Ukuran</div>
-        <div class="grid-2">
-            <div class="slider-group" id="wGroup">
-                <div class="slider-header">
-                    <span>Width</span>
-                    <span id="wVal">56 px</span>
+                <!-- Input Ukuran -->
+                <div class="input-section">
+                    <div class="input-label">Input Ukuran (px)</div>
+                    <div class="input-row">
+                        <input type="text" id="sizeInput" value="UDim2.fromScale(56, 56)" spellcheck="false">
+                        <button id="applySizeBtn">Preview</button>
+                    </div>
+                    <div class="error" id="sizeError"></div>
                 </div>
-                <input type="range" id="wSlider" min="20" max="300" step="1" value="56">
-            </div>
-            <div class="slider-group" id="hGroup">
-                <div class="slider-header">
-                    <span>Height</span>
-                    <span id="hVal">56 px</span>
+
+                <div class="sep"></div>
+
+                <!-- Posisi -->
+                <div class="section-label">Posisi</div>
+                <div class="grid-2">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>X</span>
+                            <span id="xVal">0.50</span>
+                        </div>
+                        <input type="range" id="xSlider" min="0" max="1" step="0.01" value="0.50">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>Y</span>
+                            <span id="yVal">0.50</span>
+                        </div>
+                        <input type="range" id="ySlider" min="0" max="1" step="0.01" value="0.50">
+                    </div>
                 </div>
-                <input type="range" id="hSlider" min="20" max="300" step="1" value="56">
-            </div>
-        </div>
 
-        <div class="toggle-row">
-            <span class="toggle-label">Kunci rasio 1:1</span>
-            <label class="toggle">
-                <input type="checkbox" id="ratioToggle">
-                <span class="toggle-slider"></span>
-            </label>
-        </div>
+                <div class="sep"></div>
 
-        <div class="sep"></div>
+                <!-- Bentuk -->
+                <div class="section-label">Bentuk</div>
+                <div class="segmented" id="shapeControl">
+                    <button class="active" data-shape="square">
+                        <span class="icon square"></span> Kotak
+                    </button>
+                    <button data-shape="circle">
+                        <span class="icon circle"></span> Bulat
+                    </button>
+                </div>
 
-        <div class="presets">
-            <button class="preset-btn active" data-x="0.50" data-y="0.50">default (0.50, 0.50)</button>
-            <button class="preset-btn" id="resetSizeBtn">reset ukuran</button>
-        </div>
+                <div class="sep"></div>
 
-        <div class="sep"></div>
+                <!-- Ukuran -->
+                <div class="section-label">Ukuran</div>
+                <div class="grid-2">
+                    <div class="slider-group" id="wGroup">
+                        <div class="slider-header">
+                            <span>Width</span>
+                            <span id="wVal">56 px</span>
+                        </div>
+                        <input type="range" id="wSlider" min="20" max="300" step="1" value="56">
+                    </div>
+                    <div class="slider-group" id="hGroup">
+                        <div class="slider-header">
+                            <span>Height</span>
+                            <span id="hVal">56 px</span>
+                        </div>
+                        <input type="range" id="hSlider" min="20" max="300" step="1" value="56">
+                    </div>
+                </div>
 
-        <div class="output">
-            <div class="output-line">
-                <code id="posOutput">Posisi: UDim2.fromScale(<span class="num">0.50</span>, <span class="num">0.50</span>)</code>
-                <button class="copy-btn" data-copy="pos">Salin</button>
-            </div>
-            <div class="output-sep"></div>
-            <div class="output-line">
-                <code id="sizeOutput">Ukuran: UDim2.fromScale(<span class="num">56</span>, <span class="num">56</span>)</code>
-                <button class="copy-btn" data-copy="size">Salin</button>
-            </div>
-            <div class="output-sep"></div>
-            <div class="output-line">
-                <code id="allOutput">Semua: { pos, size }</code>
-                <button class="copy-btn" data-copy="all">Salin</button>
+                <div class="toggle-row">
+                    <span class="toggle-label">Kunci rasio 1:1</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="ratioToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="sep"></div>
+
+                <div class="presets">
+                    <button class="preset-btn active" data-x="0.50" data-y="0.50">default (0.50, 0.50)</button>
+                    <button class="preset-btn" id="resetSizeBtn">reset ukuran</button>
+                </div>
+
+                <div class="sep"></div>
+
+                <div class="output">
+                    <div class="output-line">
+                        <code id="posOutput">Posisi: UDim2.fromScale(<span class="num">0.50</span>, <span class="num">0.50</span>)</code>
+                        <button class="copy-btn" data-copy="pos">Salin</button>
+                    </div>
+                    <div class="output-sep"></div>
+                    <div class="output-line">
+                        <code id="sizeOutput">Ukuran: UDim2.fromScale(<span class="num">56</span>, <span class="num">56</span>)</code>
+                        <button class="copy-btn" data-copy="size">Salin</button>
+                    </div>
+                    <div class="output-sep"></div>
+                    <div class="output-line">
+                        <code id="allOutput">Semua: { pos, size }</code>
+                        <button class="copy-btn" data-copy="all">Salin</button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -688,9 +770,13 @@
 
                 hGroup.classList.toggle('disabled', lockRatio);
 
-                // Sync input fields dengan nilai saat ini
-                posInput.value = `UDim2.fromScale(${fx}, ${fy})`;
-                sizeInput.value = `UDim2.fromScale(${fw}, ${fh})`;
+                // Sync input fields
+                if (document.activeElement !== posInput) {
+                    posInput.value = `UDim2.fromScale(${fx}, ${fy})`;
+                }
+                if (document.activeElement !== sizeInput) {
+                    sizeInput.value = `UDim2.fromScale(${fw}, ${fh})`;
+                }
             }
 
             function measure() {
@@ -756,7 +842,6 @@
             const POS_REGEX = /^\s*UDim2\.fromScale\s*\(\s*(-?\d*\.?\d+)\s*,\s*(-?\d*\.?\d+)\s*\)\s*$/i;
             const SIZE_REGEX = /^\s*UDim2\.fromScale\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)\s*$/i;
 
-            // Apply posisi
             function applyPos() {
                 const val = posInput.value.trim();
                 const m = val.match(POS_REGEX);
@@ -783,7 +868,6 @@
                 render();
             }
 
-            // Apply ukuran
             function applySize() {
                 const val = sizeInput.value.trim();
                 const m = val.match(SIZE_REGEX);
