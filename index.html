@@ -553,7 +553,7 @@
 </head>
 <body>
     <div class="panel">
-        <!-- Header dengan badge pos + size (warna sama) -->
+        <!-- Header dengan badge pos + size -->
         <div class="header">
             <div class="title">
                 <span class="dot"></span>
@@ -663,7 +663,7 @@
                 <div class="sep"></div>
 
                 <div class="presets">
-                    <button class="preset-btn active" data-x="0.50" data-y="0.50">default (0.50, 0.50)</button>
+                    <button class="preset-btn active" id="resetPosBtn">reset posisi</button>
                     <button class="preset-btn" id="resetSizeBtn">reset ukuran</button>
                 </div>
 
@@ -713,7 +713,7 @@
             const applySizeBtn = document.getElementById('applySizeBtn');
             const posError = document.getElementById('posError');
             const sizeError = document.getElementById('sizeError');
-            const presetBtns = document.querySelectorAll('.preset-btn[data-x]');
+            const resetPosBtn = document.getElementById('resetPosBtn');
             const resetSizeBtn = document.getElementById('resetSizeBtn');
             const shapeControl = document.getElementById('shapeControl');
             const shapeButtons = shapeControl.querySelectorAll('button');
@@ -721,9 +721,11 @@
             const hGroup = document.getElementById('hGroup');
             const copyBtns = document.querySelectorAll('.copy-btn[data-copy]');
 
+            const DEFAULT_POS = 0.50;
             const DEFAULT_SIZE = 56;
+
             let areaW = 0, areaH = 0;
-            let x = 0.50, y = 0.50;
+            let x = DEFAULT_POS, y = DEFAULT_POS;
             let w = DEFAULT_SIZE, h = DEFAULT_SIZE;
             let shape = 'square';
             let lockRatio = false;
@@ -762,11 +764,9 @@
                 if (Math.abs(parseFloat(wSlider.value) - w) > 0.5) wSlider.value = w;
                 if (Math.abs(parseFloat(hSlider.value) - h) > 0.5) hSlider.value = h;
 
-                presetBtns.forEach(btn => {
-                    const bx = parseFloat(btn.dataset.x);
-                    const by = parseFloat(btn.dataset.y);
-                    btn.classList.toggle('active', Math.abs(bx - x) < 0.001 && Math.abs(by - y) < 0.001);
-                });
+                // Highlight tombol reset posisi saat di posisi default
+                const isDefaultPos = Math.abs(x - DEFAULT_POS) < 0.001 && Math.abs(y - DEFAULT_POS) < 0.001;
+                resetPosBtn.classList.toggle('active', isDefaultPos);
 
                 hGroup.classList.toggle('disabled', lockRatio);
 
@@ -819,14 +819,14 @@
                 });
             });
 
-            presetBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    x = parseFloat(btn.dataset.x);
-                    y = parseFloat(btn.dataset.y);
-                    render();
-                });
+            // Reset posisi
+            resetPosBtn.addEventListener('click', () => {
+                x = DEFAULT_POS;
+                y = DEFAULT_POS;
+                render();
             });
 
+            // Reset ukuran
             resetSizeBtn.addEventListener('click', () => {
                 w = DEFAULT_SIZE;
                 h = DEFAULT_SIZE;
