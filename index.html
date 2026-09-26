@@ -468,7 +468,7 @@
             margin: 16px 0;
         }
 
-        /* ===== Presets ===== */
+        /* ===== Presets (semua warna sama #7aa2ff) ===== */
         .presets {
             display: flex;
             gap: 8px;
@@ -477,9 +477,9 @@
 
         .preset-btn {
             flex: 1;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.8);
+            background: rgba(122, 162, 255, 0.08);
+            border: 1px solid rgba(122, 162, 255, 0.3);
+            color: #7aa2ff;
             padding: 8px 10px;
             border-radius: 10px;
             font-size: 0.72rem;
@@ -491,15 +491,17 @@
         }
 
         .preset-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(122, 162, 255, 0.4);
-            color: #fff;
+            background: rgba(122, 162, 255, 0.18);
+            border-color: rgba(122, 162, 255, 0.6);
+            color: #7aa2ff;
+            box-shadow: 0 0 12px rgba(122, 162, 255, 0.3);
         }
 
         .preset-btn.active {
-            background: rgba(122, 162, 255, 0.15);
-            border-color: rgba(122, 162, 255, 0.6);
+            background: rgba(122, 162, 255, 0.22);
+            border-color: #7aa2ff;
             color: #7aa2ff;
+            box-shadow: 0 0 14px rgba(122, 162, 255, 0.4);
         }
 
         /* ===== Output ===== */
@@ -643,7 +645,7 @@
             <!-- ===== Kolom Preview ===== -->
             <div class="col-preview">
                 <div class="preview" id="preview">
-                    <div class="target shape-square" id="target">🎯</div>
+                    <div class="target shape-circle" id="target">🎯</div>
                 </div>
             </div>
 
@@ -710,10 +712,10 @@
                 <!-- Bentuk -->
                 <div class="section-label">Bentuk</div>
                 <div class="segmented" id="shapeControl">
-                    <button class="active" data-shape="square">
+                    <button data-shape="square">
                         <span class="icon square"></span> Kotak
                     </button>
-                    <button data-shape="circle">
+                    <button class="active" data-shape="circle">
                         <span class="icon circle"></span> Bulat
                     </button>
                 </div>
@@ -859,11 +861,12 @@
             const DEFAULT_POS = 0.50;
             const DEFAULT_SIZE = 56;
             const DEFAULT_RGB = { r: 122, g: 162, b: 255 };
+            const DEFAULT_SHAPE = 'circle';
 
             let areaW = 0, areaH = 0;
             let x = DEFAULT_POS, y = DEFAULT_POS;
             let w = DEFAULT_SIZE, h = DEFAULT_SIZE;
-            let shape = 'square';
+            let shape = DEFAULT_SHAPE;
             let lockRatio = false;
             let r = DEFAULT_RGB.r, g = DEFAULT_RGB.g, b = DEFAULT_RGB.b;
 
@@ -927,6 +930,8 @@
 
                 const isDefaultPos = Math.abs(x - DEFAULT_POS) < 0.001 && Math.abs(y - DEFAULT_POS) < 0.001;
                 resetPosBtn.classList.toggle('active', isDefaultPos);
+                const isDefaultSize = w === DEFAULT_SIZE && h === DEFAULT_SIZE;
+                resetSizeBtn.classList.toggle('active', isDefaultSize);
                 const isDefaultColor = r === DEFAULT_RGB.r && g === DEFAULT_RGB.g && b === DEFAULT_RGB.b;
                 resetColorBtn.classList.toggle('active', isDefaultColor);
 
